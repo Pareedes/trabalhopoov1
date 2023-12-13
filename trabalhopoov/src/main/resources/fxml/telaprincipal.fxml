@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.DatePicker?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.shape.Line?>
+<?import javafx.scene.text.Font?>
+<?import javafx.scene.text.Text?>
+
+
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="493.0" prefWidth="788.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="poov.trabalhopoov.ControllerTelaPrincipal">
+   <children>
+      <Text layoutX="158.0" layoutY="38.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Pessoa" wrappingWidth="114.30322265625">
+         <font>
+            <Font name="FreeSans Bold" size="18.0" />
+         </font>
+      </Text>
+      <Text layoutX="537.0" layoutY="38.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Vacina" wrappingWidth="114.30322265625">
+         <font>
+            <Font name="FreeSans Bold" size="18.0" />
+         </font>
+      </Text>
+      <Line endX="-53.0" endY="-200.0" layoutX="446.0" layoutY="232.0" startX="-53.0" startY="216.0" />
+      <Text fontSmoothingType="LCD" layoutX="14.0" layoutY="72.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Código:" wrappingWidth="114.30322265625">
+         <font>
+            <Font name="FreeSans" size="14.0" />
+         </font>
+      </Text>
+      <Text fontSmoothingType="LCD" layoutX="14.0" layoutY="102.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Nome:" wrappingWidth="114.30322265625">
+         <font>
+            <Font name="FreeSans" size="14.0" />
+         </font>
+      </Text>
+      <Text fontSmoothingType="LCD" layoutX="15.0" layoutY="133.0" strokeType="OUTSIDE" strokeWidth="0.0" text="CPF:" wrappingWidth="114.30322265625">
+         <font>
+            <Font name="FreeSans" size="14.0" />
+         </font>
+      </Text>
+      <Text fontSmoothingType="LCD" layoutX="15.0" layoutY="169.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Nascimento:" wrappingWidth="114.30322265625">
+         <font>
+            <Font name="FreeSans" size="14.0" />
+         </font>
+      </Text>
+      <Text fontSmoothingType="LCD" layoutX="15.0" layoutY="196.0" strokeType="OUTSIDE" strokeWidth="0.0" text="A partir de:" textAlignment="RIGHT" wrappingWidth="72.30322265625">
+         <font>
+            <Font name="FreeSans" size="14.0" />
+         </font>
+      </Text>
+      <Text fontSmoothingType="LCD" layoutX="15.0" layoutY="224.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Até:" textAlignment="RIGHT" wrappingWidth="72.30322265625">
+         <font>
+            <Font name="FreeSans" size="14.0" />
+         </font>
+      </Text>
+      <TextField fx:id="pessoaCodigo" layoutX="72.0" layoutY="55.0" prefHeight="0.0" prefWidth="175.0" />
+      <TextField fx:id="pessoaNome" layoutX="72.0" layoutY="85.0" prefHeight="0.0" prefWidth="175.0" />
+      <TextField fx:id="pessoaCpf" layoutX="72.0" layoutY="116.0" prefHeight="0.0" prefWidth="175.0" />
+      <DatePicker fx:id="dataInicial" layoutX="98.0" layoutY="179.0" />
+      <DatePicker fx:id="dataFinal" layoutX="98.0" layoutY="207.0" />
+      <Button fx:id="botaoPesquisarPessoa" layoutX="272.0" layoutY="85.0" mnemonicParsing="false" onAction="#pesquisarPessoaClicado" text="Pesquisar" />
+      <TableView fx:id="tabelaPessoa" layoutX="15.0" layoutY="247.0" prefHeight="206.0" prefWidth="364.0">
+        <columns>
+          <TableColumn fx:id="colunaCodigoPessoa" prefWidth="75.0" text="Código" />
+          <TableColumn fx:id="colunaNomePessoa" prefWidth="75.0" text="Nome" />
+            <TableColumn fx:id="colunaCpfPessoa" prefWidth="75.0" text="CPF" />
+            <TableColumn fx:id="colunaNascimentoPessoa" prefWidth="138.0" text="Nascimento" />
+        </columns>
+      </TableView>
+      <TableView fx:id="tabelaVacina" layoutX="404.0" layoutY="247.0" prefHeight="206.0" prefWidth="264.0">
+         <columns>
+            <TableColumn fx:id="colunaCodigoVacina" prefWidth="75.0" text="Código" />
+            <TableColumn fx:id="colunaNomeVacina" prefWidth="75.0" text="Nome" />
+            <TableColumn fx:id="colunaDescricaoVacina" prefWidth="113.0" text="Descrição" />
+         </columns>
+      </TableView>
+      <Button fx:id="botaoVacinaNova" layoutX="688.0" layoutY="305.0" mnemonicParsing="false" onAction="#vacinaNovaClicado" prefHeight="24.0" prefWidth="81.0" text="Nova" />
+      <Button fx:id="botaoVacinaEditar" layoutX="690.0" layoutY="338.0" mnemonicParsing="false" onAction="#vacinaEditarClicado" prefHeight="24.0" prefWidth="77.0" text="Editar" />
+      <Button fx:id="botaoVacinaRemover" layoutX="690.0" layoutY="372.0" mnemonicParsing="false" onAction="#vacinaRemoverClicado" text="Remover" />
+      <Text fontSmoothingType="LCD" layoutX="425.0" layoutY="72.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Código:" wrappingWidth="53.30322265625">
+         <font>
+            <Font name="FreeSans" size="14.0" />
+         </font>
+      </Text>
+      <Text fontSmoothingType="LCD" layoutX="434.0" layoutY="102.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Nome:" wrappingWidth="53.30322265625">
+         <font>
+            <Font name="FreeSans" size="14.0" />
+         </font>
+      </Text>
+      <Text fontSmoothingType="LCD" layoutX="411.0" layoutY="133.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Descrição:" wrappingWidth="114.30322265625">
+         <font>
+            <Font name="FreeSans" size="14.0" />
+         </font>
+      </Text>
+      <TextField fx:id="vacinaCodigo" layoutX="478.0" layoutY="55.0" prefHeight="0.0" prefWidth="175.0" />
+      <TextField fx:id="vacinaNome" layoutX="478.0" layoutY="85.0" prefHeight="0.0" prefWidth="175.0" />
+      <TextArea fx:id="vacinaDescricao" layoutX="478.0" layoutY="121.0" prefHeight="91.0" prefWidth="175.0" />
+      <Button fx:id="botaoPesquisarVacina" layoutX="688.0" layoutY="85.0" mnemonicParsing="false" onAction="#pesquisarVacinaClicado" text="Pesquisar" />
+      <Button fx:id="botaoCriarAplicação" layoutX="335.0" layoutY="458.0" mnemonicParsing="false" onAction="#criarAplicacaoClicado" text="Criar Aplicação" />
+   </children>
+</AnchorPane>
