@@ -16,7 +16,6 @@ import poov.trabalhopoov.models.dao.VacinaDAO;
 public class ControllerTelaAuxiliarEditar {
 
     private Vacina vacina;
-    private VacinaDAO vacinaDAO;
 
     @FXML
     private Button botaoCancelar;
@@ -37,10 +36,6 @@ public class ControllerTelaAuxiliarEditar {
         this.vacina = vacina;
     }
 
-    @FXML
-    void botaoCancelarClicado(ActionEvent event) {
-
-    }
 
     private Boolean validarCampos() {
         return !vacinaCodigo.getText().isEmpty() &&
@@ -51,7 +46,8 @@ public class ControllerTelaAuxiliarEditar {
     @FXML
     void botaoEditarClicado(ActionEvent event) {
         if (validarCampos()) {
-            vacina = new Vacina(Long.parseLong(vacinaCodigo.getText()), vacinaNome.getText(),
+            vacina = new Vacina(Long.parseLong(vacinaCodigo.getText()),
+                    vacinaNome.getText(),
                     vacinaDescricao.getText());
             DAOFactory daoFactory = new DAOFactory();
             try {
@@ -74,4 +70,8 @@ public class ControllerTelaAuxiliarEditar {
         }
     }
 
+    @FXML
+    void botaoCancelarClicado(ActionEvent event) {
+        ((Button) event.getSource()).getScene().getWindow().hide();
+    }
 }

@@ -7,6 +7,7 @@ import java.util.ResourceBundle;
 import java.time.LocalDate;
 
 import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -21,11 +22,15 @@ import javafx.scene.control.TextField;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.MouseEvent;
 import javafx.stage.Stage;
+import java.time.format.DateTimeFormatter;
 
+import poov.trabalhopoov.models.Aplicacao;
 import poov.trabalhopoov.models.Pessoa;
+import poov.trabalhopoov.models.Situacao;
 import poov.trabalhopoov.models.Vacina;
 import poov.trabalhopoov.models.dao.DAOFactory;
 import poov.trabalhopoov.models.dao.VacinaDAO;
+import poov.trabalhopoov.models.dao.PessoaDAO;
 
 public class ControllerTelaPrincipal {
 
@@ -123,8 +128,6 @@ public class ControllerTelaPrincipal {
         stageTelaAuxiliarEditar.setScene(cena2);
         stageTelaAuxiliar.setTitle("Tela Auxiliar");
         stageTelaAuxiliarEditar.setTitle("Tela Auxiliar: Editar");
-        stageTelaAuxiliar.show();
-        stageTelaAuxiliarEditar.show();
         stageTelaAuxiliar.hide();
         stageTelaAuxiliarEditar.hide();
 
@@ -169,8 +172,8 @@ public class ControllerTelaPrincipal {
         DAOFactory daoFactory = new DAOFactory();
         try {
             daoFactory.abrirConexao();
-            VacinaDAO vacinaDAO = daoFactory.criarVacinaDAO();
-            List<Pessoa> pessoas = vacinaDAO.buscarTodasPessoas();
+            PessoaDAO pessoaDAO = daoFactory.criarPessoaDAO();
+            List<Pessoa> pessoas = pessoaDAO.buscarTodasPessoas();
 
             for (Pessoa pessoa : pessoas) {
                 System.out.println(pessoa);
@@ -203,73 +206,94 @@ public class ControllerTelaPrincipal {
         return null;
 
     }
-    
-    @FXML
-    void pesquisarPessoaClicado(ActionEvent event) {
-        String codigo = pessoaCodigo.getText();
-        String nome = pessoaNome.getText();
-        String cpf = pessoaCpf.getText();
-        LocalDate dataInicio = dataInicial.getValue();
-        LocalDate dataFim = dataFinal.getValue();
-        
-        if (codigo.isEmpty() && nome.isEmpty() && cpf.isEmpty() && dataInicio == null && dataFim == null) {
-            // Todas vacinas caso esteja vazio
-            configurarTabela();
-        } else {
-            // Pesquisa com o campo
-            DAOFactory daoFactory = new DAOFactory();
-            try {
-                daoFactory.abrirConexao();
-                VacinaDAO vacinaDAO = daoFactory.criarVacinaDAO();
-                if (dataInicio == null || dataFim == null) {
-                    // Use dataInicio e dataFim para realizar a pesquisa
-                    System.out.println("Pesquisando no intervalo de datas: " + dataInicio + " a " + dataFim);
-                    pessoas = vacinaDAO.pesquisarPessoa(codigo, nome, cpf);
-                } else {
-                    // As datas não foram completamente selecionadas
-                    System.out.println("Selecione ambas as datas para pesquisar por intervalo.");
-                }
-            } catch (SQLException e) {
-                DAOFactory.mostrarSQLException(e);
-            } finally {
-                daoFactory.fecharConexao();
-            }
-        }
-        // Apaga e atualiza a tabela
-        tabelaPessoa.getItems().clear();
-        tabelaPessoa.getItems().addAll(pessoas);
-        tabelaVacina.getItems().clear();
-        tabelaVacina.getItems().addAll(vacinas);
-    }
 
     @FXML
-    void pesquisarVacinaClicado(ActionEvent event) {
-        String codigo = vacinaCodigo.getText();
-        String nome = vacinaNome.getText();
-        String descricao = vacinaDescricao.getText();
+void pesquisarPessoaClicado(ActionEvent event) {
+    String codigo = pessoaCodigo.getText();
+    String nome = pessoaNome.getText();
+    String cpf = pessoaCpf.getText();
+    LocalDate dataInicio = dataInicial.getValue();
+    LocalDate dataFim = dataFinal.getValue();
 
-        if (codigo.isEmpty() && nome.isEmpty() && descricao.isEmpty()) {
-            // Todas vacinas caso esteja vazio
-            configurarTabela();
-        } else {
-            // Pesquisa com o campo
-            DAOFactory daoFactory = new DAOFactory();
-            try {
-                daoFactory.abrirConexao();
-                VacinaDAO vacinaDAO = daoFactory.criarVacinaDAO();
-                vacinas = vacinaDAO.pesquisarVacina(codigo, nome, descricao);
-            } catch (SQLException e) {
-                DAOFactory.mostrarSQLException(e);
-            } finally {
-                daoFactory.fecharConexao();
-            }
-        }
-        // Apaga e atualiza a tabela
-        tabelaPessoa.getItems().clear();
-        tabelaPessoa.getItems().addAll(pessoas);
-        tabelaVacina.getItems().clear();
-        tabelaVacina.getItems().addAll(vacinas);
+    Pessoa nova = new Pessoa();
+
+    try {
+        // Verificar 'codigo' é um número antes de convertê-la
+        nova.setCodigo(codigo.isEmpty() ? -1 : Long.parseLong(codigo));
+    } catch (NumberFormatException e) {
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setContentText("Digite apenas números no campo Código");
+        alert.showAndWait();
+        return;
     }
+
+    if (!nome.isEmpty()) {
+        nova.setNome(nome);
+    } else {
+        nova.setNome(null);
+    }
+
+    if (!cpf.isEmpty()) {
+        nova.setCpf(cpf);
+    } else {
+        nova.setCpf(null);
+    }
+
+    DAOFactory daoFactory = new DAOFactory();
+
+    try {
+        daoFactory.abrirConexao();
+        VacinaDAO vacinaDAO = daoFactory.criarVacinaDAO();
+        List<Pessoa> pessoasEncontradas = vacinaDAO.pesquisarEntreDatas(nova, dataInicio, dataFim);
+
+        // Limpar e adicionar os novos itens à tabela
+        tabelaPessoa.getItems().clear();
+        tabelaPessoa.getItems().addAll(pessoasEncontradas);
+    } catch (SQLException e) {
+        DAOFactory.mostrarSQLException(e);
+    } finally {
+        daoFactory.fecharConexao();
+    }
+}
+
+@FXML
+void pesquisarVacinaClicado(ActionEvent event) {
+    String codigo = vacinaCodigo.getText();
+    String nome = vacinaNome.getText();
+    String descricao = vacinaDescricao.getText();
+
+    // Verificar se a string 'codigo' contém apenas números, permitindo que seja vazia
+    if (!codigo.isEmpty()) {
+        try {
+            Long.parseLong(codigo);
+        } catch (NumberFormatException e) {
+            // Se não for um número, exibir uma mensagem de erro e retornar
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setContentText("Digite apenas números no campo Código");
+            alert.showAndWait();
+            return;
+        }
+    }
+
+    if (codigo.isEmpty() && nome.isEmpty() && descricao.isEmpty()) {
+        configurarTabela();
+    } else {
+        DAOFactory daoFactory = new DAOFactory();
+        try {
+            daoFactory.abrirConexao();
+            VacinaDAO vacinaDAO = daoFactory.criarVacinaDAO();
+            vacinas = vacinaDAO.pesquisarVacina(codigo, nome, descricao);
+        } catch (SQLException e) {
+            DAOFactory.mostrarSQLException(e);
+        } finally {
+            daoFactory.fecharConexao();
+        }
+    }
+    tabelaPessoa.getItems().clear();
+    tabelaPessoa.getItems().addAll(pessoas);
+    tabelaVacina.getItems().clear();
+    tabelaVacina.getItems().addAll(vacinas);
+}
 
     @FXML
     void vacinaEditarClicado(ActionEvent event) {
@@ -281,30 +305,96 @@ public class ControllerTelaPrincipal {
         stageTelaAuxiliar.show();
     }
 
-    @FXML
-    void criarAplicacaoClicado(ActionEvent event) {
-
+    void alertaDadosNaoPreenchidos(String mensagem) {
+        Alert novo = new Alert(AlertType.INFORMATION);
+        novo.setTitle("Dados não selecionados");
+        novo.setHeaderText("Selecione os dados necessários");
+        novo.setContentText(mensagem);
+        novo.showAndWait();
     }
 
     @FXML
+    void criarAplicacaoClicado(ActionEvent event) {
+        Vacina vSlct = tabelaVacina.getSelectionModel().getSelectedItem();
+        if (vSlct == null) {
+            alertaDadosNaoPreenchidos("Selecione uma vacina na tabela");
+        } else {
+            Pessoa pSlct = tabelaPessoa.getSelectionModel().getSelectedItem();
+            if (pSlct == null) {
+                alertaDadosNaoPreenchidos("Selecione uma pessoa na tabela");
+            } else {
+                Aplicacao novaAplication = new Aplicacao(0, LocalDate.now(), pSlct, vSlct, Situacao.ATIVO);
+                DAOFactory daoFactory = new DAOFactory();
+                try {
+                    daoFactory.abrirConexao();
+                    VacinaDAO vacinaDAO = daoFactory.criarVacinaDAO();
+                    vacinaDAO.criarAplicacao(novaAplication);
+                    Alert novo = new Alert(AlertType.CONFIRMATION);
+                    novo.setTitle("Sucesso");
+                    novo.setHeaderText("Aplicação realizada com sucesso");
+                    novo.setContentText(
+                            "\nData: " + novaAplication.getData().format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))
+                                    + "\nPaciente: " + novaAplication.getPessoa().getNome() + "\nVacina: "
+                                    + novaAplication.getVacina().getNome());
+                    novo.showAndWait();
+
+                } catch (SQLException e) {
+                    DAOFactory.mostrarSQLException(e);
+                } finally {
+                    daoFactory.fecharConexao();
+                }
+
+            }
+        }
+    }
+
+    // @FXML
+    // void vacinaRemoverClicado(ActionEvent event) {
+    // Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+    // alert.setTitle("Remover Vacina");
+    // alert.setHeaderText("Remover Vacina");
+    // alert.setContentText("Tem certeza que deseja remover a vacina?");
+    // alert.showAndWait();
+    // if (alert.getResult().getText().equals("OK")) {
+    // DAOFactory daoFactory = new DAOFactory();
+    // try {
+    // daoFactory.abrirConexao();
+    // VacinaDAO vacinaDAO = daoFactory.criarVacinaDAO();
+    // vacinaDAO.remover(vacina);
+    // tabelaVacina.getItems().remove(vacina);
+    // } catch (SQLException e) {
+    // DAOFactory.mostrarSQLException(e);
+    // } finally {
+    // daoFactory.fecharConexao();
+    // }
+    // }
+    // }
+
+    // REMOVER COM SITUACAO
+    @FXML
     void vacinaRemoverClicado(ActionEvent event) {
-        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
-        alert.setTitle("Remover Vacina");
-        alert.setHeaderText("Remover Vacina");
-        alert.setContentText("Tem certeza que deseja remover a vacina?");
-        alert.showAndWait();
-        if (alert.getResult().getText().equals("OK")) {
+        Vacina vacinaSelecionada = tabelaVacina.getSelectionModel().getSelectedItem();
+
+        if (vacinaSelecionada != null) {
             DAOFactory daoFactory = new DAOFactory();
             try {
                 daoFactory.abrirConexao();
                 VacinaDAO vacinaDAO = daoFactory.criarVacinaDAO();
-                vacinaDAO.remover(vacina);
-                tabelaVacina.getItems().remove(vacina);
+                vacinaDAO.remover(vacinaSelecionada.getCodigo());
+                configurarTabela();
+                tabelaPessoa.getItems().clear();
+                tabelaPessoa.getItems().addAll(pessoas);
+                tabelaVacina.getItems().clear();
+                tabelaVacina.getItems().addAll(vacinas);
             } catch (SQLException e) {
                 DAOFactory.mostrarSQLException(e);
             } finally {
                 daoFactory.fecharConexao();
             }
+        } else {
+            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+            alert.setContentText("Nenhuma vacina selecionada");
+            alert.showAndWait();
         }
     }
 
